@@ -1,0 +1,13 @@
+# JDK unzipped dir
+/jdk*
+# Test cases dir
+/testcases
+# Dir for outputting results
+/out
+# SysY runtime source
+/sysyrt
+# Python cache
+/__pycache__
+
+# The compiler .jar package
+*.jar
