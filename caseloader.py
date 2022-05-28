@@ -5,8 +5,21 @@ from sys import stdout
 
 
 class TestCase:
+    """A TestCase store the path to a single testcase and its metadata.
+    
+    Attributes:
+        sy_path: A Path to the source (.sy) 
+        in_path: A Path to the possible input file (.in)
+        std_out_path: A Path to the standard output file (.out)
+        name: A string of the testcase name w/o file type postfix
+        ll_name: A string of file name of llvm-ir generated (.ll)
+        bc_name: A string of file name of the interpretable bitcode file after linking (.bc)
+        gen_out_name: A string of file name of the execution output from the compiled program 
+                    (-gen.out)
+    """
+
     def __init__(self, sy_path:str, std_out_path:str, in_path:str=None) -> None:
-        """A TestCase instance store the path to a single testcase and its metadata.
+        """Initialzie a TestCase.
         """
         # Path to the source (.sy) 
         self.sy_path = Path(sy_path)
