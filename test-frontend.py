@@ -45,27 +45,35 @@ class FrontendAutoTester:
         """Run through all the testcases to generate results.
         """
         with open(self.res_path, 'w+') as res_file:
+            # Loop through each test case.
             for testcase in self.testcases:
+
+                print(f"Processing {str(testcase.sy_path):<50}")
+                
                 out_path = self.out_dir/testcase.gen_out_name
 
-                self.run_ll(
-                    self.gen_ll(testcase), out_path, testcase.in_path
-                )
+                bc_path = self.gen_ir(testcase)
+                if bc_path is None:
+                    status = 'Compilation Error'
+                else:
+                    self.run_ir(bc_path, out_path, testcase.in_path)
+                    status = ('Accecpted' if self.match(out_path, testcase.std_out_path) 
+                        else 'Wrong Answer')
 
-                msg = '{}\t\t\t{}\n'.format(
-                    testcase.sy_path,
-                    'Correct' if self.match(out_path, testcase.std_out_path) else 'Wrong'
+                res_file.write(
+                    f'{str(testcase.sy_path) : <50}\t'
+                    f'{status}\n'
                 )
-                res_file.write(msg)
     
-    def gen_ll(self, testcase:TestCase) -> str:
+    def gen_ir(self, testcase:TestCase) -> str:
         """Generate interpretable .bc file for lli.
 
         Args:
             testcase: A TestCase to be compiled.
         
         Returns:
-            A string of path to the bitcode generated.
+            A string of path to the bitcode successfully generated. If any errors
+            occurring during compilation, return None.
 
         The testcase will be firstly compiled by the compiler to generate the 
         (intermediate) .ll file, which will then be linked with the SysY runtime
@@ -80,17 +88,31 @@ class FrontendAutoTester:
             f" -s {testcase.sy_path}"
             f" -emit-llvm {ll_path}"
         )
-        os.system(cmd_compile)
+        subprocess.run(
+            cmd_compile.split(),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
+        # If the compiler didn't successfully generate an .ll file.
+        if not os.path.exists(ll_path):
+            return None
 
         # Link sysY runtime into the generated .ll file
         # retrieving the interpretable .bc file.
         bc_path = f"{self.ll_dir}/{testcase.bc_name}"
         cmd_link = f"llvm-link {ll_path} sylib.ll -o {bc_path}"
-        os.system(cmd_link)
+        subprocess.run(
+            cmd_link.split(),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
+        # If the llvm-linker didn't successfully generate a .bc file.
+        if not os.path.exists(bc_path):
+            return None
 
         return bc_path
 
-    def run_ll(self, bc_path:str, out_path:str, in_path:Optional[str]=None) -> None:
+    def run_ir(self, bc_path:str, out_path:str, in_path:Optional[str]=None) -> None:
         """Run a interpretable (self-contained) .ll file using lli.
 
         Args:
@@ -98,15 +120,27 @@ class FrontendAutoTester:
             out_path: A string of the path to the file for stdout (output).
             in_path: [Optional] A string of the path to the file for stdin (intput).
         """
-        args = ['lli', bc_path]
+        cmd_lli = f'lli {bc_path}'
 
         with open(out_path, 'a+') as out_file:
-            if in_path is None: # Has input
-                p = subprocess.run(args, stdout=out_file)
-            else:               # No input
+            # Has input
+            if in_path is None: 
+                p = subprocess.run(
+                    cmd_lli.split(), 
+                    stdout=out_file,
+                    stderr=subprocess.DEVNULL
+                )
+            # No input
+            else:               
                 with open(in_path, 'r') as in_file:
-                    p = subprocess.run(args, stdin=in_file, stdout=out_file)
-            subprocess.run(f"echo {p.returncode}".split(), stdout=out_file)
+                    p = subprocess.run(
+                        cmd_lli.split(), 
+                        stdin=in_file, 
+                        stdout=out_file,
+                        stderr=subprocess.DEVNULL
+                    )
+            # Echo the return value to the output.
+            subprocess.run(f'echo {p.returncode}'.split(), stdout=out_file)
 
     def match(self, file1:str, file2:str) -> bool:
         """Match contents of the two files.
