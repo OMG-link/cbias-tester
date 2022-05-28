@@ -160,8 +160,13 @@ class FrontendAutoTester:
                         stdout=out_file,
                         stderr=subprocess.DEVNULL
                     )
+
             # Echo the return value to the output if required.
             if echo_ret:
+                # If the execution generates any output,
+                # echo to switch to a new line for the return value.
+                if os.path.getsize(out_path) > 0:
+                    subprocess.run('echo', stdout=out_file)
                 subprocess.run(f'echo {p.returncode}'.split(), stdout=out_file)
             
 
@@ -183,9 +188,9 @@ if __name__ == "__main__":
     java_path = "./jdk-17.0.3.1/bin/java"
     out_dir = "./out"
 
-    loader = Loader("testcases/myTestcases")
-    # loader = Loader("testcases/stepcases")
+    # loader = Loader("testcases/myTestcases")
+    loader = Loader("testcases/stepcases")
     tester = FrontendAutoTester(compiler_path, loader.testcases, java_path, out_dir)
 
-    tester.run(echo_ret=False)
-    # tester.run()
+    # tester.run(echo_ret=False)
+    tester.run()
