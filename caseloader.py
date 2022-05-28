@@ -38,16 +38,38 @@ class TestCase:
 
 
 class Loader:
-    def __init__(self, testcase_dir:str) -> None:
-        self.testcase_dir = Path(testcase_dir)
-        # Create TestCase records corresponding to all .sy test case.
+    """Loader helps to load TestCase according to a given file path or directory.
+
+    Attributes:
+        testcases: A List of TestCases (to be test).
+    """
+
+    def __init__(self, path:str) -> None:
+        """Intialize a Load according to a given path.
+        
+        If the path points to a testable file (.sy file), load the file specified
+        as a single TestCase. If the path points to an existing directory, load all
+        testable files under the directory into the testcase list.
+        """
         self.testcases = []
-        for file in self.testcase_dir.glob('*.sy'):
-            std_out_path = file.with_suffix('.out')
-            in_path = file.with_suffix('.in')
+
+        p = Path(path)
+        # If the path points to a testable file (.sy).
+        if p.is_file() and p.suffix == '.sy':
+            std_out_path = p.with_suffix('.out')
+            in_path = p.with_suffix('.in')
             self.testcases.append(
-                TestCase(file, std_out_path, in_path if in_path.exists() else None)
+                TestCase(p, std_out_path, in_path if in_path.exists() else None)
             )
+        # If the path points to a existing dir,
+        # add all testable files into self.testcases.
+        elif p.is_dir():
+            for file in p.glob('*.sy'):
+                std_out_path = file.with_suffix('.out')
+                in_path = file.with_suffix('.in')
+                self.testcases.append(
+                    TestCase(file, std_out_path, in_path if in_path.exists() else None)
+                )
 
 
 if __name__ == '__main__':
