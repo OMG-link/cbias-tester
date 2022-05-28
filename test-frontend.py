@@ -10,8 +10,9 @@ from caseloader import TestCase, Loader
 
 class FrontendAutoTester:
 
-    def __init__(self, compiler_path:str, testcases:List[TestCase], 
-        java_path:str, out_dir:str) -> None:
+    def __init__(self, 
+        compiler_path:str, testcases:List[TestCase], java_path:str, out_dir:str
+    ) -> None:
         """A FrontendAutoTester is for testing the compiler frontend (generating .ll/.bc files)
         on a given batch of testcases by compiling the .sy sources, interpretively executing
         the generated .bc file, and comparing its output with the standard answser of the
@@ -41,8 +42,11 @@ class FrontendAutoTester:
         os.makedirs(self.ll_dir)
         os.makedirs(self.out_dir)
 
-    def run(self) -> None:
+    def run(self, echo_ret:bool=True) -> None:
         """Run through all the testcases to generate results.
+
+        Args:
+            echo_ret: Bool indicating if to echo the process return codes to .out files.
         """
         with open(self.res_path, 'w+') as res_file:
             # Loop through each test case.
@@ -56,7 +60,7 @@ class FrontendAutoTester:
                 if bc_path is None:
                     status = 'Compilation Error'
                 else:
-                    self.run_ir(bc_path, out_path, testcase.in_path)
+                    self.run_ir(bc_path, out_path, testcase.in_path, echo_ret)
                     status = ('Accecpted' if self.match(out_path, testcase.std_out_path) 
                         else 'Wrong Answer')
 
@@ -112,13 +116,16 @@ class FrontendAutoTester:
 
         return bc_path
 
-    def run_ir(self, bc_path:str, out_path:str, in_path:Optional[str]=None) -> None:
-        """Run a interpretable (self-contained) .ll file using lli.
+    def run_ir(self, 
+        bc_path:str, out_path:str, in_path:Optional[str]=None, echo_ret:bool=True
+    ) -> None:
+        """Run a interpretable (self-contained) .bc file using lli.
 
         Args:
             ll_path: A string of the path to the interpretable bitcode file.
             out_path: A string of the path to the file for stdout (output).
             in_path: [Optional] A string of the path to the file for stdin (intput).
+            echo_ret: Bool indicating if to echo the process return codes to .out files.
         """
         cmd_lli = f'lli {bc_path}'
 
@@ -139,8 +146,10 @@ class FrontendAutoTester:
                         stdout=out_file,
                         stderr=subprocess.DEVNULL
                     )
-            # Echo the return value to the output.
-            subprocess.run(f'echo {p.returncode}'.split(), stdout=out_file)
+            # Echo the return value to the output if required.
+            if echo_ret:
+                subprocess.run(f'echo {p.returncode}'.split(), stdout=out_file)
+            
 
     def match(self, file1:str, file2:str) -> bool:
         """Match contents of the two files.
@@ -160,7 +169,9 @@ if __name__ == "__main__":
     java_path = "./jdk-17.0.3.1/bin/java"
     out_dir = "./out"
 
-    loader = Loader("testcases/stepcases")
+    loader = Loader("testcases/myTestcases")
+    # loader = Loader("testcases/stepcases")
     tester = FrontendAutoTester(compiler_path, loader.testcases, java_path, out_dir)
 
-    tester.run()
+    tester.run(echo_ret=False)
+    # tester.run()
