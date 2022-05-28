@@ -1,4 +1,7 @@
+from genericpath import exists
+import os
 from pathlib import Path
+from sys import stdout
 
 
 class TestCase:
@@ -22,5 +25,17 @@ class TestCase:
 
 
 class Loader:
-    def __init__(self) -> None:
-        pass
+    def __init__(self, testcase_dir:str) -> None:
+        self.testcase_dir = Path(testcase_dir)
+        # Create TestCase records corresponding to all .sy test case.
+        self.testcases = []
+        for file in self.testcase_dir.glob('*.sy'):
+            std_out_path = file.with_suffix('.out')
+            in_path = file.with_suffix('.in')
+            self.testcases.append(
+                TestCase(file, std_out_path, in_path if in_path.exists() else None)
+            )
+
+
+if __name__ == '__main__':
+    loader = Loader('testcases/myTestcases')
