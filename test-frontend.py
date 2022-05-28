@@ -5,17 +5,17 @@ from pathlib import Path
 import filecmp
 from typing import List, Optional
 
-from caseloader import TestCase
+from caseloader import TestCase, Loader
 
 
 class FrontendAutoTester:
 
     def __init__(self, compiler_path:str, testcases:List[TestCase], 
         java_path:str, out_dir:str) -> None:
-        """A FrontendAutoTester is for testing the compiler frontend (generating .ll file)
-        on a given batch of testcases by compiling the .sy source, interpretively executing
-        the generated .ll file, and comparing its output with the standard answser of the
-        testcase.
+        """A FrontendAutoTester is for testing the compiler frontend (generating .ll/.bc files)
+        on a given batch of testcases by compiling the .sy sources, interpretively executing
+        the generated .bc file, and comparing its output with the standard answser of the
+        testcases.
 
         Args:
             compiler_path: A string of path to the compiler jar package.
@@ -52,13 +52,14 @@ class FrontendAutoTester:
                     self.gen_ll(testcase), out_path, testcase.in_path
                 )
 
-                res_file.write( (
-                    f"{testcase.sy_path}\t\t"
-                    "Correct" if self.match(out_path, testcase.std_out_path) else "Wrong"
-                ))
+                msg = '{}\t\t\t{}\n'.format(
+                    testcase.sy_path,
+                    'Correct' if self.match(out_path, testcase.std_out_path) else 'Wrong'
+                )
+                res_file.write(msg)
     
     def gen_ll(self, testcase:TestCase) -> str:
-        """Generate interpretable .ll file for lli.
+        """Generate interpretable .bc file for lli.
 
         Args:
             testcase: A TestCase to be compiled.
@@ -66,9 +67,10 @@ class FrontendAutoTester:
         Returns:
             A string of path to the bitcode generated.
 
-        The testcase will be compiled by the compiler, and the generated (intermediate) file
-        will be linked with the SysY runtime by llvm-link. Presume the runtime library sylib.ll
-        is under current directory.
+        The testcase will be firstly compiled by the compiler to generate the 
+        (intermediate) .ll file, which will then be linked with the SysY runtime
+        by llvm-link producing self-contained .bc bitcode file.
+        Presume the runtime library sylib.ll is under current directory.
         """
         # Compile the .sy file with our compiler.
         ll_path = f"{self.ll_dir}/{testcase.ll_name}"
@@ -100,10 +102,11 @@ class FrontendAutoTester:
 
         with open(out_path, 'a+') as out_file:
             if in_path is None: # Has input
-                subprocess.run(args, stdout=out_file)
+                p = subprocess.run(args, stdout=out_file)
             else:               # No input
                 with open(in_path, 'r') as in_file:
-                    subprocess.run(args, stdin=in_file, stdout=out_file)
+                    p = subprocess.run(args, stdin=in_file, stdout=out_file)
+            subprocess.run(f"echo {p.returncode}".split(), stdout=out_file)
 
     def match(self, file1:str, file2:str) -> bool:
         """Match contents of the two files.
@@ -122,9 +125,8 @@ if __name__ == "__main__":
     compiler_path = "./Cbias.jar"
     java_path = "./jdk-17.0.3.1/bin/java"
     out_dir = "./out"
-    prefix = "testcases/myTestcases/"
-    testcases = [TestCase(prefix+"test.sy", prefix+"test.out", prefix+"test.in")]
 
-    tester = FrontendAutoTester(compiler_path, testcases, java_path, out_dir)
+    loader = Loader("testcases/stepcases")
+    tester = FrontendAutoTester(compiler_path, loader.testcases, java_path, out_dir)
 
     tester.run()
