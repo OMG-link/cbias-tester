@@ -11,3 +11,6 @@
 
 # The compiler .jar package
 *.jar
+
+# Main script for local running
+run.py

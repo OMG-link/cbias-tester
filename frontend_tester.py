@@ -188,6 +188,9 @@ if __name__ == "__main__":
     java_path = "./jdk-17.0.3.1/bin/java"
     out_dir = "./out"
 
+    scheme = {
+        
+    }
     # loader = Loader("testcases/myTestcases")
     loader = Loader("testcases/stepcases")
 
