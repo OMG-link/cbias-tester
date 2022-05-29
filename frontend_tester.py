@@ -24,6 +24,7 @@ class FrontendAutoTester:
         ir_dir: A Path to the subdir storing ir files generated (./<root_dir>/ir)
         out_dir: A Path to the subdir storing all compiled program output (./<root_dir>/out)
         res_path: A Path to the text file storing all matching results (./<root_dir>/result.log)
+        max_path_width: The max .sy path width in testcases (for aligning log results on terminal) 
     """
 
     def __init__(self, 
@@ -50,6 +51,7 @@ class FrontendAutoTester:
         self.ir_dir = self.root_dir/"ir"
         self.out_dir = self.root_dir/"out"
         self.res_path = self.root_dir/"result.log"
+        self.max_path_width = max([len(str(tc.sy_path)) for tc in self.testcases])
 
         # Create a dir to store generated files.
         os.makedirs(self.root_dir)
@@ -76,8 +78,8 @@ class FrontendAutoTester:
                         else 'Wrong Answer')
 
                 log = (
-                    f'{str(testcase.sy_path) : <50}\t'
-                    f'{status}\n'
+                    str(testcase.sy_path).ljust(self.max_path_width, ' ')
+                    + f' \t{status}\n'
                 )
                 res_file.write(log)
                 if terminal_log:
