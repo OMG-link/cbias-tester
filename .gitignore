@@ -4,8 +4,6 @@
 /testcases
 # Dir for outputting results
 /out
-# SysY runtime source
-/sysyrt
 # Python cache
 /__pycache__
 
@@ -14,3 +12,7 @@
 
 # Main script for local running
 run.py
+
+# SysY runtime source should be compiled
+# manually for using under different platform
+sylib.ll
