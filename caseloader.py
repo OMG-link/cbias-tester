@@ -2,6 +2,7 @@ from genericpath import exists
 import os
 from pathlib import Path
 from sys import stdout
+import shutil
 
 
 class TestCase:
@@ -35,6 +36,22 @@ class TestCase:
         self.bc_name = self.name + ".bc"
         # File name for output log file
         self.gen_out_name = self.name + "-gen.out"
+
+    def copy_to(self, dest:str) -> Path:
+        """Copy all files realted to a testcase to a given directory.
+
+        Args:
+            dest: String of the path to the target directory.
+        Returns:
+            pathlib.Path to the directory created by the methods for storing the copy of the files.
+        """
+        copy_path = Path(dest)/self.name
+        os.makedirs(copy_path)
+        shutil.copyfile(self.sy_path, copy_path/(self.sy_path.name))
+        if not self.in_path is None:
+            shutil.copyfile(self.in_path, copy_path/(self.in_path.name))
+        shutil.copyfile(self.std_out_path, copy_path/(self.std_out_path.name))
+        return copy_path
 
 
 class Loader:

@@ -1,5 +1,6 @@
 import subprocess
 import os
+import shutil
 from datetime import datetime
 from pathlib import Path
 import filecmp
@@ -47,12 +48,16 @@ class FrontendAutoTester:
         self.ir_dir = self.root_dir/"ir"
         self.out_dir = self.root_dir/"out"
         self.res_path = self.root_dir/"result.log"
+        self.wrongans_dir = self.root_dir/"wa-cases"
+        self.compilerr_dir = self.root_dir/"ce-cases"
         self.max_path_width = 45
 
         # Create a dir to store generated files.
         os.makedirs(self.root_dir)
         os.makedirs(self.ir_dir)
         os.makedirs(self.out_dir)
+        os.makedirs(self.wrongans_dir)
+        os.makedirs(self.compilerr_dir)
 
     def run(self, 
         testcases: List[TestCase], echo_ret:bool=True, terminal_log=True) -> None:
@@ -65,6 +70,10 @@ class FrontendAutoTester:
         new_width = max([len(str(tc.sy_path)) for tc in testcases])
         if new_width > self.max_path_width:
             self.max_path_width = new_width
+        # Statistic Info
+        cnt_wrongans = 0
+        cnt_compilerr = 0
+
         # Run.
         with open(self.res_path, 'a+') as res_file:
             # Loop through each test case.
@@ -74,10 +83,23 @@ class FrontendAutoTester:
                 bc_path = self.gen_ir(testcase)
                 if bc_path is None:
                     status = 'Compilation Error'
+                    cnt_compilerr += 1
+                    # Copy the error-compiled testcase to the CE-directory.
+                    p = testcase.copy_to(self.compilerr_dir)
+                    ll_path = self.ir_dir/testcase.ll_name
+                    if os.path.exists(ll_path):
+                        shutil.copyfile(self.ll_path, p/self.ll_path)
                 else:
                     self.run_ir(bc_path, out_path, testcase.in_path, echo_ret)
-                    status = ('Accecpted' if self.match(out_path, testcase.std_out_path) 
-                        else 'Wrong Answer')
+                    if self.match(out_path, testcase.std_out_path):
+                        status = 'Accecpted'
+                    else:
+                        status = 'Wrong Answer'
+                        cnt_wrongans += 1
+                        # Copy the wrongly answered testcase to the WA-directory.
+                        p = testcase.copy_to(self.wrongans_dir)
+                        shutil.copyfile(self.ll_path, p/self.ll_path)
+                        shutil.copyfile(self.out_path, p/self.out_path)
 
                 log = (
                     str(testcase.sy_path).ljust(self.max_path_width, ' ')
