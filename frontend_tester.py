@@ -73,12 +73,14 @@ class FrontendAutoTester:
         # Statistic Info
         cnt_wrongans = 0
         cnt_compilerr = 0
+        cnt_accecpt = 0
 
         # Run.
         with open(self.res_path, 'a+') as res_file:
             # Loop through each test case.
             for testcase in testcases:                
                 out_path = self.out_dir/testcase.gen_out_name
+                ll_path = self.ir_dir/testcase.ll_name
 
                 bc_path = self.gen_ir(testcase)
                 if bc_path is None:
@@ -86,21 +88,20 @@ class FrontendAutoTester:
                     cnt_compilerr += 1
                     # Copy the error-compiled testcase to the CE-directory.
                     p = testcase.copy_to(self.compilerr_dir)
-                    ll_path = self.ir_dir/testcase.ll_name
                     if os.path.exists(ll_path):
-                        shutil.copyfile(self.ll_path, p/self.ll_path)
+                        shutil.copyfile(ll_path, p/(ll_path.name))
                 else:
                     self.run_ir(bc_path, out_path, testcase.in_path, echo_ret)
                     if self.match(out_path, testcase.std_out_path):
                         status = 'Accecpted'
+                        cnt_accecpt += 1
                     else:
                         status = 'Wrong Answer'
                         cnt_wrongans += 1
                         # Copy the wrongly answered testcase to the WA-directory.
                         p = testcase.copy_to(self.wrongans_dir)
-                        shutil.copyfile(self.ll_path, p/self.ll_path)
-                        shutil.copyfile(self.out_path, p/self.out_path)
-
+                        shutil.copyfile(ll_path, p/(ll_path.name))
+                        shutil.copyfile(out_path, p/out_path.name)
                 log = (
                     str(testcase.sy_path).ljust(self.max_path_width, ' ')
                     + f' \t{status}\n'
@@ -108,6 +109,16 @@ class FrontendAutoTester:
                 res_file.write(log)
                 if terminal_log:
                     print(log, end='')
+            # Statistical conclusion.
+            stat_conclu = (
+                f'AC: {cnt_accecpt:>3}/{len(testcases)}, '
+                f'CE: {cnt_compilerr:>3}/{len(testcases)}, '
+                f'WA: {cnt_wrongans:>3}/{len(testcases)}\n'
+            )
+            res_file.write(stat_conclu)
+            if terminal_log:
+                print(stat_conclu, end='')
+
     
     def gen_ir(self, testcase:TestCase) -> str:
         """Generate interpretable .bc file for lli.
