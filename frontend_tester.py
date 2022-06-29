@@ -167,10 +167,14 @@ class FrontendAutoTester:
 
             # Echo the return value to the output if required.
             if echo_ret:
-                # If the execution generates any output,
+                # If the execution generates any output, and the last character
+                # is not a newline ('\n'), then
                 # echo to switch to a new line for the return value.
                 if os.path.getsize(out_path) > 0:
-                    subprocess.run('echo', stdout=out_file)
+                    with open(out_path, 'r') as f:
+                        last_ch = f.read()[-1]
+                    if last_ch != '\n':
+                        subprocess.run('echo', stdout=out_file)
                 subprocess.run(f'echo {p.returncode}'.split(), stdout=out_file)
             
 
