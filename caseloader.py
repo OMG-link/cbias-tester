@@ -81,7 +81,7 @@ class Loader:
         # If the path points to a existing dir,
         # add all testable files into self.testcases.
         elif p.is_dir():
-            for file in p.glob('*.sy'):
+            for file in sorted(p.glob('*.sy')):
                 std_out_path = file.with_suffix('.out')
                 in_path = file.with_suffix('.in')
                 self.testcases.append(
