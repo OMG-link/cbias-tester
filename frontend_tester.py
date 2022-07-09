@@ -84,6 +84,10 @@ class FrontendAutoTester:
                 out_path = self.out_dir/testcase.gen_out_name
                 ll_path = self.ir_dir/testcase.ll_name
 
+                if terminal_log:
+                    print(str(testcase.sy_path).ljust(self.max_path_width, ' ') + f' \tRunning', 
+                    end='\r')
+
                 bc_path = self.gen_ir(testcase)
                 if bc_path is None:
                     status = 'Compilation Error'
