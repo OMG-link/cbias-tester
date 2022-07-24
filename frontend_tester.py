@@ -146,8 +146,8 @@ class FrontendAutoTester:
         cmd_compile = (
             f"{self.java_path}"
             f" -jar {self.compiler_path}"
-            f" -s {testcase.sy_path}"
             f" -emit-llvm {ll_path}"
+            f" {testcase.sy_path}"
         )
         subprocess.run(
             cmd_compile.split(),
