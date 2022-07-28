@@ -116,11 +116,12 @@ class FrontendAutoTester:
                 if terminal_log:
                     print(log, end='')
             # Statistical conclusion.
-            stat_conclu = (
-                f'AC: {cnt_accecpt:>3}/{len(testcases)}, '
-                f'CE: {cnt_compilerr:>3}/{len(testcases)}, '
-                f'WA: {cnt_wrongans:>3}/{len(testcases)}\n'
-            )
+            stat_conclu = \
+                ('✔ ' if cnt_wrongans == 0 and cnt_compilerr == 0 else '! ') + (
+                    f'AC: {cnt_accecpt:>3}/{len(testcases):<3}, '
+                    f'CE: {cnt_compilerr:>3}/{len(testcases):<3}, '
+                    f'WA: {cnt_wrongans:>3}/{len(testcases):<3}\n'
+                )
             stat_file.write(stat_conclu)
             if terminal_log:
                 print(stat_conclu, end='')
