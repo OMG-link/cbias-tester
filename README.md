@@ -13,4 +13,7 @@ test can be perform on frontend for debugging purposes.
 
 ## Backend Tester
 
-Uploaded soon.
+Batch test script of an ARM compiler for debugging.
+
+Please run the [backend_tester_x86](./backend_tester_x86) first to gen & transfer assembly,
+then run the [backend_tester_arm](./backend_tester_arm) to get the test report.
