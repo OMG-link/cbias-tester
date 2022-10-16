@@ -93,13 +93,14 @@ testcases/function_test2022/01_var_defn2.sy             Accecpted
 testcases/function_test2022/02_var_defn3.sy             Accecpted
 ...
 testcases/function_test2022/95_float.sy                 Accecpted
-testcases/function_test2022/96_matrix_add.sy            Complation Error
+testcases/function_test2022/96_matrix_add.sy            Accecpted
 testcases/function_test2022/97_matrix_sub.sy            Accecpted
-testcases/function_test2022/98_matrix_mul.sy            Wrong Answer
+testcases/function_test2022/98_matrix_mul.sy            Accecpted
 testcases/function_test2022/99_matrix_tran.sy           Accecpted
 ✔ AC: 100/100, CE:   0/100, WA:   0/100
 ```
 
+Completion status: 
 * Accecpted: A testcase end with correct output answer.
 * Complation Error: Errors occured during `testcase.sy` =[Cbias.jar]=> `testcase.ll` =[llvm-link]=> `testcase.bc`.
 * Wrong Answer: Errors occured during `testcase.bc` =[lli]=> `testcase-gen.out`, or the answer matching phase.
