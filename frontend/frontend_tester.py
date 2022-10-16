@@ -240,9 +240,9 @@ if __name__ == "__main__":
         
     }
     # loader = Loader("testcases/myTestcases")
-    loader = Loader("testcases/stepcases")
+    loader = Loader("testcases/performance/median0.sy")
 
-    tester = FrontendAutoTester(compiler_path, loader.testcases, java_path, out_dir)
+    tester = FrontendAutoTester(compiler_path, java_path, out_dir)
 
     # tester.run(echo_ret=False)
-    tester.run()
+    tester.run(loader.testcases)
