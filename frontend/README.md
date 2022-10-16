@@ -101,8 +101,8 @@ testcases/function_test2022/99_matrix_tran.sy           Accecpted
 ```
 
 Completion status: 
-* Accecpted: A testcase end with correct output answer.
-* Complation Error: Errors occured during `testcase.sy` =[Cbias.jar]=> `testcase.ll` =[llvm-link]=> `testcase.bc`.
-* Wrong Answer: Errors occured during `testcase.bc` =[lli]=> `testcase-gen.out`, or the answer matching phase.
+* Accecpted (AC): A testcase end with correct output answer.
+* Compilation Error (CE): Errors occured during `testcase.sy` =[Cbias.jar]=> `testcase.ll` =[llvm-link]=> `testcase.bc`.
+* Wrong Answer (WA): Errors occured during `testcase.bc` =[lli]=> `testcase-gen.out`, or the answer matching phase.
 
 Under `out` dir, more detailed results and statistical reports will be generated.
