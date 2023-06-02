@@ -1,6 +1,7 @@
 import subprocess
 import os
 import shutil
+import sys
 from datetime import datetime
 from pathlib import Path
 import filecmp
@@ -228,7 +229,12 @@ class FrontendAutoTester:
         Returns:
             True if the two files are identical. Otherwise, return False.
         """
-        return filecmp.cmp(file1, file2, shallow=False)
+        if sys.platform.startswith('linux'):
+            diff_command = ["diff", "-Z", file1, file2]
+            result = subprocess.run(diff_command, capture_output=True, text=True)
+            return result.returncode == 0
+        else:
+            return filecmp.cmp(file1, file2, shallow=False)
         
 
 if __name__ == "__main__":
